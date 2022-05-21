@@ -22,7 +22,7 @@ public class Main {
         Map<Object, Object> data = new HashMap<>();
         //data.put("outdoors", "");
         data.put("sport", "5");
-        data.put("date", "2022-05-22");
+        data.put("date", "2022-05-25");
         data.put("q", "Göteborg");
 
         HttpRequest request = HttpRequest.newBuilder(URI.create("https://www.matchi.se/book/findFacilities"))
@@ -46,9 +46,16 @@ public class Main {
             responseBody = HTTP_CLIENT.send(request, HttpResponse.BodyHandlers.ofString()).body();
         }
 
-        courts = courts.stream()
+        courts.stream()
                 .sorted(Comparator.comparing(Court::getHourlyRate))
-                .collect(Collectors.toList());
+                .forEach(court -> {
+                    System.out.println();
+                    System.out.println("Facility: " + court.getFacilityName());
+                    System.out.println("Duration: " + court.getDuration());
+                    System.out.println("Court: " + court.getName());
+                    System.out.println("Price: " + court.getPrice());
+                    System.out.println("Rate: " + court.getHourlyRate());
+                });
     }
 
     private static HttpRequest getHttpRequest(int offset, Map<Object, Object> data) {

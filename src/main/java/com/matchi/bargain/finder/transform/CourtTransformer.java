@@ -13,9 +13,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.matchi.bargain.finder.CommonUtils.HTTP_CLIENT;
@@ -34,7 +32,7 @@ public class CourtTransformer implements Transformer<TransformData, List<Court>>
         Document document = Jsoup.parse(transformData.getHtml());
         Elements facilities = document.getElementsByClass("row");
         String timeFilterString = getTimeFilterString(transformData.getHour(), transformData.getMinute());
-        return facilities.stream()
+        Map<String, Court> slotPriceCourtMap = facilities.stream()
                 .flatMap(element -> {
                     try {
                         String facilityName = element.getElementsByClass("media-heading h4").get(0).getAllElements().get(1).childNodes().get(0).toString();
@@ -44,7 +42,22 @@ public class CourtTransformer implements Transformer<TransformData, List<Court>>
                     }
                 })
                 .filter(Objects::nonNull)
-                .collect(Collectors.toList());
+                .collect(Collectors.toMap(Court::getSlotPriceId, court -> court));
+
+        List<Slot> slotPrices = getSlotPrices(new ArrayList<>(slotPriceCourtMap.keySet()));
+
+        slotPrices.stream()
+                .forEach(slot -> {
+                    int price = slot.getPrice();
+                    Court court = slotPriceCourtMap.get(slot.getSlotId());
+                    court.setPrice(price);
+                    if(court.getDuration().contains("60")) {
+                        court.setHourlyRate(price);
+                    } else {
+                        court.setHourlyRate(price / 1.5);
+                    }
+                });
+        return new ArrayList<>(slotPriceCourtMap.values());
     }
 
     private List<Court> getCourts(Element element, String facilityName, String timeToFilter) {
@@ -58,21 +71,23 @@ public class CourtTransformer implements Transformer<TransformData, List<Court>>
                     //Element 5 duration
                     String duration = e.getAllElements().get(5).getAllElements().get(0).childNodes().get(0).toString();
                     //Element 13 price
-                    String priceSlotId = e.getAllElements().get(13).getAllElements().get(0).attributes().toString();
-                    priceSlotId = priceSlotId.substring(11, priceSlotId.length() - 1);
+                    String slotPriceId = e.getAllElements().get(13).getAllElements().get(0).attributes().toString();
+                    slotPriceId = slotPriceId.substring(11, slotPriceId.length() - 1);
                     //Temporary solution to retrieve price here
-                    int price = getSlotPrice(priceSlotId);
-                    if(duration.contains("60")) {
-                        return new Court(courtName, price, duration, facilityName, price);
-                    } else {
-                        return new Court(courtName, price, duration, facilityName, price / 1.5);
-                    }
+                    //int price = getSlotPrice(slotPriceId);
+                    return new Court(courtName, duration, facilityName, slotPriceId);
                 })
                 .collect(Collectors.toList());
     }
 
-    private int getSlotPrice(String slotId) {
-        String uri = String.format("https://www.matchi.se/book/getSlotPrices?slotId=%s", slotId);
+    private List<Slot> getSlotPrices(List<String> slotIds) {
+        String uri = String.format("https://www.matchi.se/book/getSlotPrices?slotId=%s", slotIds.remove(0));
+        if(!slotIds.isEmpty()) {
+            String queryParams = "&slotId=";
+            queryParams += String.join("&slotId=", slotIds);
+            uri += queryParams;
+        }
+
         HttpRequest request = HttpRequest.newBuilder(URI.create(uri))
                 .GET()
                 .build();
@@ -81,7 +96,7 @@ public class CourtTransformer implements Transformer<TransformData, List<Court>>
             HttpResponse<String> response = HTTP_CLIENT.send(request, HttpResponse.BodyHandlers.ofString());
             List<Slot> slots = MAPPER.readValue(response.body(), new TypeReference<>() {
             });
-            return slots.get(0).getPrice();
+            return slots;
         } catch (IOException | InterruptedException e) {
             if(e instanceof InterruptedException) {
                 Thread.currentThread().interrupt();
