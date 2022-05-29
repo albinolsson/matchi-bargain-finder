@@ -58,7 +58,6 @@ public class SearchRequestHandlerHelperImpl implements SearchRequestHandlerHelpe
             }
             throw new RuntimeException("Error happened while retrieving courts", e);
         }
-
     }
 
     private HttpRequest getHttpRequest(int offset, Map<Object, Object> data) {

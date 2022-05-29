@@ -10,10 +10,9 @@ import com.matchi.bargain.finder.enumeration.EnvironmentType;
 import com.matchi.bargain.finder.exception.InvalidRequestException;
 import com.matchi.bargain.finder.model.Court;
 import com.matchi.bargain.finder.model.RequestParameters;
-import org.joda.time.DateTime;
 
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -36,13 +35,18 @@ public class SearchRequestHandler implements RequestHandler<APIGatewayProxyReque
 
     @Override
     public APIGatewayProxyResponseEvent handleRequest(APIGatewayProxyRequestEvent requestEvent, Context context) {
+        context.getLogger().log(requestEvent.toString());
         try {
             RequestParameters requestParameters = getAndValidateRequestQueryParameters(requestEvent);
             List<Court> courts = searchRequestHandlerHelper.getCourts(requestParameters);
             String responseBody = mapper.writeValueAsString(courts);
 
+            final Map<String, String> headers = new HashMap<>();
+            headers.put("Content-Type", "application/json");
+
             return new APIGatewayProxyResponseEvent()
                     .withBody(responseBody)
+                    .withHeaders(headers)
                     .withStatusCode(200);
 
         } catch (InvalidRequestException e) {

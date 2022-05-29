@@ -1,0 +1,24 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  daily-news-java
+  Sample SAM Template for daily-news-java
+# More info about Globals: https://github.com/awslabs/serverless-application-model/blob/master/docs/globals.rst
+Globals:
+  Function:
+    Timeout: 20
+
+Resources:
+  SearchRequestHandler:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: SearchRequestHandler
+      Handler: com.matchi.bargain.finder.handler.SearchRequestHandler::handleRequest
+      Runtime: java11
+      MemorySize: 512
+      Events:
+        HelloWorld:
+          Type: Api
+          Properties:
+            Path: /search
+            Method: get
