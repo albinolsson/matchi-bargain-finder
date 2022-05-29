@@ -11,18 +11,16 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
-import java.util.stream.Collectors;
 
 import static com.matchi.bargain.finder.CommonUtils.HTTP_CLIENT;
-import static com.matchi.bargain.finder.CommonUtils.sleep;
 
 public class Main {
     public static void main(String[] args) throws IOException, InterruptedException {
 
         Map<Object, Object> data = new HashMap<>();
-        //data.put("outdoors", "");
+        data.put("outdoors", "1");
         data.put("sport", "5");
-        data.put("date", "2022-05-25");
+        data.put("date", "2022-05-31");
         data.put("q", "Göteborg");
 
         HttpRequest request = HttpRequest.newBuilder(URI.create("https://www.matchi.se/book/findFacilities"))

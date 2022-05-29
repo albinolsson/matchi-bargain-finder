@@ -44,20 +44,23 @@ public class CourtTransformer implements Transformer<TransformData, List<Court>>
                 .filter(Objects::nonNull)
                 .collect(Collectors.toMap(Court::getSlotPriceId, court -> court));
 
-        List<Slot> slotPrices = getSlotPrices(new ArrayList<>(slotPriceCourtMap.keySet()));
+        if(!slotPriceCourtMap.isEmpty()) {
+            List<Slot> slotPrices = getSlotPrices(new ArrayList<>(slotPriceCourtMap.keySet()));
 
-        slotPrices.stream()
-                .forEach(slot -> {
-                    int price = slot.getPrice();
-                    Court court = slotPriceCourtMap.get(slot.getSlotId());
-                    court.setPrice(price);
-                    if(court.getDuration().contains("60")) {
-                        court.setHourlyRate(price);
-                    } else {
-                        court.setHourlyRate(price / 1.5);
-                    }
-                });
-        return new ArrayList<>(slotPriceCourtMap.values());
+            slotPrices.stream()
+                    .forEach(slot -> {
+                        int price = slot.getPrice();
+                        Court court = slotPriceCourtMap.get(slot.getSlotId());
+                        court.setPrice(price);
+                        if(court.getDuration().contains("60")) {
+                            court.setHourlyRate(price);
+                        } else {
+                            court.setHourlyRate(price / 1.5);
+                        }
+                    });
+            return new ArrayList<>(slotPriceCourtMap.values());
+        }
+        return Collections.emptyList();
     }
 
     private List<Court> getCourts(Element element, String facilityName, String timeToFilter) {
