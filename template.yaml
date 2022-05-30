@@ -12,7 +12,7 @@ Resources:
   SearchRequestHandler:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: SearchRequestHandler
+      CodeUri: code
       Handler: com.matchi.bargain.finder.handler.SearchRequestHandler::handleRequest
       Runtime: java11
       MemorySize: 512
