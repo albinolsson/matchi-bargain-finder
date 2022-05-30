@@ -41,7 +41,7 @@ public class SearchRequestHandlerHelperImpl implements SearchRequestHandlerHelpe
             LocalDateTime localDateTime = requestParameters.getLocalDateTime();
 
             while(responseBody.length() > 2000) {
-                TransformData transformData = new TransformData(responseBody, Integer.toString(localDateTime.getHour()), Integer.toString(localDateTime.getMinute()));
+                TransformData transformData = new TransformData(responseBody, Integer.toString(localDateTime.getHour()), localDateTime.toString().split(":")[1]);
                 courts.addAll(CourtTransformer.INSTANCE.transform(transformData));
 
                 offset += 10;
@@ -88,7 +88,7 @@ public class SearchRequestHandlerHelperImpl implements SearchRequestHandlerHelpe
         String city = requestParameters.getCity();
 
         Map<Object, Object> data = new HashMap<>();
-        data.put("outdoors", environmentType == EnvironmentType.BOTH ? "" : (environmentType == EnvironmentType.OUTDOOR ? 0 : 1));
+        data.put("outdoors", environmentType == EnvironmentType.BOTH ? "" : (environmentType == EnvironmentType.OUTDOOR ? 1 : 0));
         data.put("sport", "5");
         data.put("date", date);
         data.put("q", URLDecoder.decode(city, StandardCharsets.UTF_8));
