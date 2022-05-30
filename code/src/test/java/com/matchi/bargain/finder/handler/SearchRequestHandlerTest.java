@@ -1,7 +1,6 @@
 package com.matchi.bargain.finder.handler;
 
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent;
-import org.junit.Test;
 
 import java.net.URLEncoder;
 import java.nio.charset.Charset;

@@ -1,0 +1,11 @@
+version = 0.1
+
+[default]
+[default.deploy]
+[default.deploy.parameters]
+stack_name = "MatchiBargainFinder"
+s3_bucket = "aws-sam-cli-managed-default-samclisourcebucket-1sh14puesbibx"
+s3_prefix = "MatchiBargainFinder"
+region = "eu-north-1"
+capabilities = "CAPABILITY_IAM"
+image_repositories = []
